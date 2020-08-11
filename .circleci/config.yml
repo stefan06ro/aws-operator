@@ -28,7 +28,7 @@ jobs:
     - checkout
 
     - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/architect/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
+        wget -q https://github.com/giantswarm/architect/releases/download/885fee2/architect
         chmod +x ./architect
         ./architect version
 
