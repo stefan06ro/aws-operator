@@ -14,7 +14,5 @@ const TemplateMainOutputs = `
     Value: {{ .Outputs.OperatorVersion }}
   VPCID:
     Value: !Ref VPC
-  VPCPeeringConnectionID:
-    Value: !Ref VPCPeeringConnection
 {{- end -}}
 `

@@ -12,12 +12,11 @@ import (
 )
 
 const (
-	HostedZoneID              = "HostedZoneID"
-	HostedZoneNameServersKey  = "HostedZoneNameServers"
-	InternalHostedZoneID      = "InternalHostedZoneID"
-	OperatorVersion           = "OperatorVersion"
-	VPCIDKey                  = "VPCID"
-	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
+	HostedZoneID             = "HostedZoneID"
+	HostedZoneNameServersKey = "HostedZoneNameServers"
+	InternalHostedZoneID     = "InternalHostedZoneID"
+	OperatorVersion          = "OperatorVersion"
+	VPCIDKey                 = "VPCID"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -131,14 +130,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.TCCP.VPC.ID = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
 	}
 
 	return nil

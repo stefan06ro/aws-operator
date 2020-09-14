@@ -41,13 +41,6 @@ const TemplateMainRouteTables = `
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
         Value: private
-  {{ .VPCPeeringRouteName }}:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref {{ .ResourceName }}
-      DestinationCidrBlock: {{ $v.HostClusterCIDR }}
-      VpcPeeringConnectionId:
-        Ref: VPCPeeringConnection
   {{- end }}
 {{- end -}}
 `

@@ -13,5 +13,4 @@ type ParamsMainRouteTablesRouteTableName struct {
 	AvailabilityZone       string
 	AvailabilityZoneRegion string
 	ResourceName           string
-	VPCPeeringRouteName    string
 }

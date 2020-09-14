@@ -43,7 +43,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
-	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/resource/secretfinalizer"
@@ -51,7 +50,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
@@ -578,21 +576,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var tccpiResource resource.Interface
-	{
-		c := tccpi.Config{
-			Event:  config.Event,
-			Logger: config.Logger,
-
-			InstallationName: config.InstallationName,
-		}
-
-		tccpiResource, err = tccpi.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpVPCIDResource resource.Interface
 	{
 		c := tccpvpcid.Config{
@@ -628,18 +611,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		natGatewayAddressesResource, err = natgatewayaddresses.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var peerRoleARNResource resource.Interface
-	{
-		c := peerrolearn.Config{
-			Logger: config.Logger,
-		}
-
-		peerRoleARNResource, err = peerrolearn.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -768,7 +739,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		awsClientResource,
 		accountIDResource,
 		natGatewayAddressesResource,
-		peerRoleARNResource,
 		cpHostedZoneResource,
 		cpRouteTablesResource,
 		cpVPCResource,
@@ -787,7 +757,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		tccpSecurityGroupsResource,
 		s3BucketResource,
 		tccpAZsResource,
-		tccpiResource,
 		tccpResource,
 		tccpfResource,
 		serviceResource,

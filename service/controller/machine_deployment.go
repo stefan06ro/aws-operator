@@ -41,10 +41,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpazs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpinstanceinfo"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
@@ -473,19 +471,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
-	var tccpVPCPCXResource resource.Interface
-	{
-		c := tccpvpcpcx.Config{
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
-		}
-
-		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
@@ -536,21 +521,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 
 		tcnpResource, err = tcnp.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var tcnpfResource resource.Interface
-	{
-		c := tcnpf.Config{
-			Event:  config.Event,
-			Logger: config.Logger,
-
-			InstallationName: config.InstallationName,
-		}
-
-		tcnpfResource, err = tcnpf.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -632,7 +602,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
-		tccpVPCPCXResource,
 		tccpSubnetsResource,
 		tccpAZsResource,
 		asgNameResource,
@@ -647,7 +616,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		s3ObjectResource,
 		ipamResource,
 		tcnpResource,
-		tcnpfResource,
 
 		// All these resources implement logic to update CR status information.
 		tcnpStatusResource,

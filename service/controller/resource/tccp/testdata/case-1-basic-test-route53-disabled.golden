@@ -5,8 +5,6 @@ Outputs:
     Value: 7.3.0
   VPCID:
     Value: !Ref VPC
-  VPCPeeringConnectionID:
-    Value: !Ref VPCPeeringConnection
 Resources:
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -303,60 +301,6 @@ Resources:
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: public
-  PrivateRouteTableEuCentral1a:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-private-1a
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1a
-      - Key: giantswarm.io/route-table-type
-        Value: private
-  VPCPeeringRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: VPCPeeringConnection
-  PrivateRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-private-1b
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
-      - Key: giantswarm.io/route-table-type
-        Value: private
-  VPCPeeringRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: VPCPeeringConnection
-  PrivateRouteTableEuCentral1c:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-private-1c
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1c
-      - Key: giantswarm.io/route-table-type
-        Value: private
-  VPCPeeringRouteEuCentral1c:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1c
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: VPCPeeringConnection
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -722,21 +666,9 @@ Resources:
     Type: AWS::EC2::VPCCidrBlock
     DependsOn:
       - VPC
-      - VPCPeeringConnection
     Properties:
       CidrBlock: 172.17.0.1/16
       VpcId: !Ref VPC
-  VPCPeeringConnection:
-    Type: 'AWS::EC2::VPCPeeringConnection'
-    Properties:
-      VpcId: !Ref VPC
-      PeerVpcId: vpc-testid
-      # PeerOwnerId may be a number starting with 0. Cloud Formation is not able
-      # to properly deal with that by its own so the configured value must be
-      # quoted in order to ensure the peer owner id is properly handled as
-      # string. Otherwise stack creation fails.
-      PeerOwnerId: "control-plane-account"
-      PeerRoleArn: peer-role-arn
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:

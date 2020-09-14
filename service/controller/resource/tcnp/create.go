@@ -63,12 +63,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
-
-		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
 	}
 
 	{
@@ -577,25 +571,6 @@ func (r *Resource) newVPC(ctx context.Context, cr infrastructurev1alpha2.AWSMach
 	}
 
 	var routeTables []template.ParamsMainVPCRouteTable
-	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
-		r := template.ParamsMainVPCRouteTable{
-			ControlPlane: template.ParamsMainVPCRouteTableControlPlane{
-				VPC: template.ParamsMainVPCRouteTableControlPlaneVPC{
-					CIDR: cc.Status.ControlPlane.VPC.CIDR,
-				},
-			},
-			Route: template.ParamsMainVPCRouteTableRoute{
-				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(a.Name)),
-			},
-			RouteTable: template.ParamsMainVPCRouteTableRouteTable{
-				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
-			},
-			TenantCluster: template.ParamsMainVPCRouteTableTenantCluster{
-				PeeringConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-			},
-		}
-		routeTables = append(routeTables, r)
-	}
 
 	vpc := &template.ParamsMainVPC{
 		Cluster: template.ParamsMainVPCCluster{

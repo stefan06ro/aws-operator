@@ -16,7 +16,6 @@ type ContextStatusControlPlane struct {
 	HostedZone   ContextStatusControlPlaneHostedZone
 	NATGateway   ContextStatusControlPlaneNATGateway
 	RouteTables  []*ec2.RouteTable
-	PeerRole     ContextStatusControlPlanePeerRole
 	VPC          ContextStatusControlPlaneVPC
 }
 
@@ -26,10 +25,6 @@ type ContextStatusControlPlaneHostedZone struct {
 
 type ContextStatusControlPlaneNATGateway struct {
 	Addresses []*ec2.Address
-}
-
-type ContextStatusControlPlanePeerRole struct {
-	ARN string
 }
 
 type ContextStatusControlPlaneVPC struct {
@@ -128,8 +123,7 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {
-	ID                  string
-	PeeringConnectionID string
+	ID string
 }
 
 type ContextStatusTenantClusterTCCPN struct {

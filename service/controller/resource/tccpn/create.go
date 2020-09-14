@@ -47,12 +47,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-
 		if len(cc.Status.TenantCluster.TCCP.Subnets) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "subnets not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")

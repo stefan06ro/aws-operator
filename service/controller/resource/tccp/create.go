@@ -36,15 +36,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		// When a tenant cluster is created, the CPI resource creates a peer role and
-		// with it an ARN for it. As long as the peer role ARN is not present, we have
-		// to cancel the resource to prevent further TCCP resource actions.
-		if cc.Status.ControlPlane.PeerRole.ARN == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster's control plane peer role arn not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-
 		// When the TCCP cloud formation stack is transitioning, it means it is
 		// updating in most cases. We do not want to interfere with the current
 		// process and stop here. We will then check on the next reconciliation loop
@@ -428,15 +419,6 @@ func (r *Resource) newParamsMainRouteTables(ctx context.Context, cr infrastructu
 	}
 
 	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		rtName := template.ParamsMainRouteTablesRouteTableName{
-			AvailabilityZone:       az.Name,
-			AvailabilityZoneRegion: key.AvailabilityZoneRegionSuffix(az.Name),
-			ResourceName:           key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-			VPCPeeringRouteName:    key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
-		}
-		privateRouteTableNames = append(privateRouteTableNames, rtName)
-	}
 
 	var routeTables *template.ParamsMainRouteTables
 	{
@@ -590,10 +572,8 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 			ClusterID:        key.ClusterID(&cr),
 			InstallationName: r.installationName,
 			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,
-			PeerVPCID:        cc.Status.ControlPlane.VPC.ID,
 			Region:           key.Region(cr),
 			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
-			PeerRoleArn:      cc.Status.ControlPlane.PeerRole.ARN,
 			RouteTableNames:  routeTableNames,
 		}
 	}

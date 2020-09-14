@@ -110,9 +110,6 @@ func ChinaControllerContext() controllercontext.Context {
 						},
 					},
 				},
-				PeerRole: controllercontext.ContextStatusControlPlanePeerRole{
-					ARN: "peer-role-arn",
-				},
 				VPC: controllercontext.ContextStatusControlPlaneVPC{
 					CIDR: "10.1.0.0/16",
 					ID:   "vpc-testid",
@@ -257,8 +254,7 @@ func ChinaControllerContext() controllercontext.Context {
 						},
 					},
 					VPC: controllercontext.ContextStatusTenantClusterTCCPVPC{
-						ID:                  "vpc-id",
-						PeeringConnectionID: "peering-connection-id",
+						ID: "vpc-id",
 					},
 				},
 			},
@@ -368,9 +364,6 @@ func DefaultControllerContext() controllercontext.Context {
 							},
 						},
 					},
-				},
-				PeerRole: controllercontext.ContextStatusControlPlanePeerRole{
-					ARN: "peer-role-arn",
 				},
 				VPC: controllercontext.ContextStatusControlPlaneVPC{
 					CIDR: "10.1.0.0/16",
@@ -516,8 +509,7 @@ func DefaultControllerContext() controllercontext.Context {
 						},
 					},
 					VPC: controllercontext.ContextStatusTenantClusterTCCPVPC{
-						ID:                  "vpc-id",
-						PeeringConnectionID: "peering-connection-id",
+						ID: "vpc-id",
 					},
 				},
 			},

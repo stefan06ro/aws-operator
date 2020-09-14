@@ -38,7 +38,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
@@ -279,19 +278,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
-	var tccpVPCPCXResource resource.Interface
-	{
-		c := tccpvpcpcx.Config{
-			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
-		}
-
-		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var encryptionSearcherResource resource.Interface
 	{
 		c := encryptionsearcher.Config{
@@ -463,7 +449,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		tccpAZsResource,
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
-		tccpVPCPCXResource,
 		tccpSubnetsResource,
 		cpVPCResource,
 		regionResource,

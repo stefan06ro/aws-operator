@@ -30,14 +30,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-	}
-
-	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
@@ -78,20 +70,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane finalizer cloud formation stack already exists")
-	}
-
-	{
-		update, err := r.detection.ShouldUpdate(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if update {
-			err = r.updateStack(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
 	}
 
 	return nil
@@ -185,50 +163,6 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1a
 	return recordSets, nil
 }
 
-func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainRouteTables, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var privateRoutes []template.ParamsMainRouteTablesRoute
-	{
-		for _, rt := range cc.Status.ControlPlane.RouteTables {
-			for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-				// Only those AZs have private subnet in TCCP that run master
-				// node. Rest of the AZs are there with public subnet only
-				// while the private subnet exists in corresponding node pools.
-				// Therefore we need to skip nil Private.CIDRs because there's
-				// nothing where we can route the traffic to.
-				if az.Subnet.Private.CIDR.IP == nil || az.Subnet.Private.CIDR.Mask == nil {
-					continue
-				}
-
-				route := template.ParamsMainRouteTablesRoute{
-					RouteTableID: *rt.RouteTableId,
-					// Requester CIDR block, we create the peering connection from the
-					// tenant's private subnets.
-					CidrBlock: az.Subnet.Private.CIDR.String(),
-					// The peer connection id is fetched from the cloud formation stack
-					// outputs in the stackoutput resource.
-					PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-				}
-
-				privateRoutes = append(privateRoutes, route)
-			}
-		}
-	}
-
-	var routeTables *template.ParamsMainRouteTables
-	{
-		routeTables = &template.ParamsMainRouteTables{
-			PrivateRoutes: privateRoutes,
-		}
-	}
-
-	return routeTables, nil
-}
-
 func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
@@ -236,172 +170,11 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		routeTables, err := r.newRouteTablesParams(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
 
 		params = &template.ParamsMain{
-			RecordSets:  recordSets,
-			RouteTables: routeTables,
+			RecordSets: recordSets,
 		}
 	}
 
 	return params, nil
-}
-
-// updateStack is a special implementation of updating the TCCPF stack in the
-// when we have to update route tables in case of an upgrade from 1 to 3
-// masters. The update is then processed in two update steps. The first stack
-// update removes the registered route tables. The second stack update adds the
-// new route tables. The reason we cannot update the route tables in place is
-// that Cloud Formation is not able to transition properly from current to
-// desired state in case the order of Availability Zones we use for route table
-// definitions changes. Thus the workaround is to delete and re-create instead
-// of update in place. The implication during the upgrade process is broken
-// connectivity to the Control Plane for about 60 seconds under normal
-// circumstances. This affects SSH access to EC2 instances and Prometheus
-// scraping.
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	var templateBody string
-	{
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "removing route tables",
-		)
-
-		params, err := r.newTemplateParams(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		params.RouteTables.PrivateRoutes = nil
-
-		templateBody, err = template.Render(params)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "computed the template of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "removing route tables",
-		)
-	}
-
-	{
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "requesting the update of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "removing route tables",
-		)
-
-		i := &cloudformation.UpdateStackInput{
-			Capabilities: []*string{
-				aws.String(capabilityNamesIAM),
-			},
-			StackName:    aws.String(key.StackNameTCCPF(&cr)),
-			TemplateBody: aws.String(templateBody),
-		}
-
-		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateStack(i)
-		if IsNoUpdate(err) {
-			// Here we want to fall through in case no real change needs to be
-			// done in this stage of the two step update process. We can end up
-			// here in case the second step below fails and we try to start
-			// over. Retrying will cause the first step here to fail without
-			// matching against the noUpdateError, because the route tables
-			// already got removed.
-		} else if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "requested the update of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "removing route tables",
-		)
-	}
-
-	{
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "waiting for the update of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "removing route tables",
-		)
-
-		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.StackNameTCCPF(&cr)),
-		}
-
-		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackUpdateComplete(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "waited for the update of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "removing route tables",
-		)
-	}
-
-	{
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "adding route tables",
-		)
-
-		params, err := r.newTemplateParams(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		templateBody, err = template.Render(params)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx,
-			"level", "debug", "message",
-			"computed the template of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "adding route tables",
-		)
-	}
-
-	{
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "requesting the update of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "adding route tables",
-		)
-
-		i := &cloudformation.UpdateStackInput{
-			Capabilities: []*string{
-				aws.String(capabilityNamesIAM),
-			},
-			StackName:    aws.String(key.StackNameTCCPF(&cr)),
-			TemplateBody: aws.String(templateBody),
-		}
-
-		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateStack(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "requested the update of the tenant cluster's control plane finalizer cloud formation stack",
-			"reason", "adding route tables",
-		)
-	}
-
-	return nil
 }

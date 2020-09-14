@@ -10,7 +10,6 @@ func Render(v interface{}) (string, error) {
 	l := []string{
 		TemplateMain,
 		TemplateMainRecordSets,
-		TemplateMainRouteTables,
 	}
 
 	s, err := template.Render(l, v)

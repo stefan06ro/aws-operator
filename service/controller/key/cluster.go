@@ -68,7 +68,6 @@ const (
 	StackTCCPI = "tccpi"
 	StackTCCPN = "tccpn"
 	StackTCNP  = "tcnp"
-	StackTCNPF = "tcnpf"
 )
 
 const (
@@ -217,10 +216,6 @@ func Region(cluster infrastructurev1alpha2.AWSCluster) string {
 
 func RoleNameMaster(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
-}
-
-func RolePeerAccess(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(&cluster))
 }
 
 func RouteTableName(cluster infrastructurev1alpha2.AWSCluster, suffix, az string) string {

@@ -16,21 +16,9 @@ const TemplateMainVPC = `
     Type: AWS::EC2::VPCCidrBlock
     DependsOn:
       - VPC
-      - VPCPeeringConnection
     Properties:
       CidrBlock: {{ $v.CIDRBlockAWSCNI }}
       VpcId: !Ref VPC
-  VPCPeeringConnection:
-    Type: 'AWS::EC2::VPCPeeringConnection'
-    Properties:
-      VpcId: !Ref VPC
-      PeerVpcId: {{ $v.PeerVPCID }}
-      # PeerOwnerId may be a number starting with 0. Cloud Formation is not able
-      # to properly deal with that by its own so the configured value must be
-      # quoted in order to ensure the peer owner id is properly handled as
-      # string. Otherwise stack creation fails.
-      PeerOwnerId: "{{ $v.HostAccountID }}"
-      PeerRoleArn: {{ $v.PeerRoleArn }}
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
