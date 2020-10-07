@@ -8,6 +8,7 @@ Outputs:
   {{ template "outputs" . }}
 Resources:
   {{ template "auto_scaling_group" . }}
+  {{ template "auto_scaling_group_spot" . }}
   {{ template "iam_policies" . }}
   {{ template "launch_template" . }}
   {{ template "route_tables" . }}

@@ -9,7 +9,8 @@ import (
 func Render(v interface{}) (string, error) {
 	l := []string{
 		TemplateMain,
-		TemplateMainAutoScalingGroup,
+		TemplateOnDemandAutoScalingGroup,
+		TemplateSpotAutoScalingGroup,
 		TemplateMainIAMPolicies,
 		TemplateMainLaunchTemplate,
 		TemplateMainOutputs,

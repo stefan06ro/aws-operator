@@ -1,8 +1,9 @@
 package template
 
-const TemplateMainAutoScalingGroup = `
-{{- define "auto_scaling_group" -}}
-  NodePoolAutoScalingGroup:
+const TemplateSpotAutoScalingGroup = `
+{{- define "auto_scaling_group_spot" -}}
+  {{- if gt .AutoScalingGroup.OnDemandPercentageAboveBaseCapacity 0 -}}
+  NodePoolSpotAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
@@ -14,7 +15,7 @@ const TemplateMainAutoScalingGroup = `
         - {{ $az }}
       {{- end }}
       DesiredCapacity: {{ .AutoScalingGroup.DesiredCapacity }}
-      MinSize: {{ .AutoScalingGroup.MinSize }}
+      MinSize: 0
       MaxSize: {{ .AutoScalingGroup.MaxSize }}
       MixedInstancesPolicy:
         LaunchTemplate:
@@ -54,6 +55,12 @@ const TemplateMainAutoScalingGroup = `
         - Key: Name
           Value: {{ .AutoScalingGroup.Cluster.ID }}-worker
           PropagateAtLaunch: true
+        - Key: giantswarm.io/strategy
+          Value: spot
+          PropagateAtLaunch: true
+        - Key: giantswarm.io/autoscaling-priority
+          Value: 1000
+          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
@@ -73,5 +80,6 @@ const TemplateMainAutoScalingGroup = `
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
+  {{- end -}}
 {{- end -}}
 `
