@@ -30,7 +30,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		// When aws operator starts it needs to find CP VPC information, so we have to
 		// cancel the resource in case the information is not available yet.
-		if cc.Status.ControlPlane.VPC.ID == "" || cc.Status.ControlPlane.VPC.CIDR == "" {
+		if cc.Status.ControlPlane.VPC.CIDR == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "control plane VPC info not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil

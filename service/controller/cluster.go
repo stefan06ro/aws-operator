@@ -35,6 +35,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cphostedzone"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
@@ -702,6 +703,20 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var cpVPCResource resource.Interface
+	{
+		c := cpvpc.Config{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		cpVPCResource, err = cpvpc.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tenantClientsResource resource.Interface
 	{
 		c := tenantclients.Config{
@@ -722,6 +737,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		accountIDResource,
 		natGatewayAddressesResource,
 		cpHostedZoneResource,
+		cpVPCResource,
 		tccpVPCIDResource,
 		tccpOutputsResource,
 		tccpSubnetsResource,
