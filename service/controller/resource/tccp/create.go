@@ -421,6 +421,14 @@ func (r *Resource) newParamsMainRouteTables(ctx context.Context, cr infrastructu
 	}
 
 	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		rtName := template.ParamsMainRouteTablesRouteTableName{
+			AvailabilityZone:       az.Name,
+			AvailabilityZoneRegion: key.AvailabilityZoneRegionSuffix(az.Name),
+			ResourceName:           key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+		}
+		privateRouteTableNames = append(privateRouteTableNames, rtName)
+	}
 
 	var routeTables *template.ParamsMainRouteTables
 	{
