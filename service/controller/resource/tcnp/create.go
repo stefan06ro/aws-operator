@@ -165,6 +165,8 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			TemplateBody:                aws.String(templateBody),
 		}
 
+		fmt.Println(templateBody)
+
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
