@@ -387,6 +387,39 @@ Resources:
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: public
+  PrivateRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-1a
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  PrivateRouteTableEuCentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-1b
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  PrivateRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-1c
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: private
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
