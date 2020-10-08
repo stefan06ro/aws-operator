@@ -12,31 +12,31 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 22
         ToPort: 22
-        CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+        CidrIp: 0.0.0.0/0
       -
         Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
         FromPort: 4194
         ToPort: 4194
-        CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+        CidrIp: 0.0.0.0/0
       -
         Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
         IpProtocol: tcp
         FromPort: 10250
         ToPort: 10250
-        CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+        CidrIp: 0.0.0.0/0
       -
         Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
         IpProtocol: tcp
         FromPort: 10300
         ToPort: 10300
-        CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+        CidrIp: 0.0.0.0/0
       -
         Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
         IpProtocol: tcp
         FromPort: 10301
         ToPort: 10301
-        CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+        CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
           Value: {{ .SecurityGroups.ClusterID }}-worker

@@ -446,6 +446,8 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 		return nil, microerror.Mask(err)
 	}
 
+	fmt.Printf("vol-debug\n%v", cc)
+
 	var nodePools []template.ParamsMainSecurityGroupsTenantClusterNodePool
 	for _, ID := range cc.Spec.TenantCluster.TCNP.SecurityGroupIDs {
 		np := template.ParamsMainSecurityGroupsTenantClusterNodePool{
