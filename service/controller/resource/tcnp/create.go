@@ -575,6 +575,19 @@ func (r *Resource) newVPC(ctx context.Context, cr infrastructurev1alpha2.AWSMach
 	}
 
 	var routeTables []template.ParamsMainVPCRouteTable
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		r := template.ParamsMainVPCRouteTable{
+			ControlPlane: template.ParamsMainVPCRouteTableControlPlane{
+				VPC: template.ParamsMainVPCRouteTableControlPlaneVPC{
+					CIDR: cc.Status.ControlPlane.VPC.CIDR,
+				},
+			},
+			RouteTable: template.ParamsMainVPCRouteTableRouteTable{
+				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			},
+		}
+		routeTables = append(routeTables, r)
+	}
 
 	vpc := &template.ParamsMainVPC{
 		Cluster: template.ParamsMainVPCCluster{

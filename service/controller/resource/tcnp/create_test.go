@@ -3,6 +3,7 @@ package tcnp
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
@@ -149,6 +150,7 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			fmt.Println(templateBody)
 			_, err = yaml.YAMLToJSONStrict([]byte(templateBody))
 			if err != nil {
 				t.Fatal(err)

@@ -123,7 +123,8 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {
-	ID string
+	ID                  string
+	PeeringConnectionID string
 }
 
 type ContextStatusTenantClusterTCCPN struct {
