@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupenis"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuploadbalancers"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
@@ -376,6 +377,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		c := ipam.Config{
 			Checker:   clusterChecker,
 			Collector: subnetCollector,
+			K8sClient: config.K8sClient,
 			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: clusterPersister,
@@ -437,6 +439,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		cleanupEBSVolumesResource, err = cleanupebsvolumes.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupENIs resource.Interface
+	{
+		c := cleanupenis.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupENIs, err = cleanupenis.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -758,6 +772,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		cleanupMachineDeploymentsResource,
 		cleanupRecordSets,
 		cleanupSecurityGroups,
+		cleanupENIs,
 		keepForAWSControlPlaneCRsResource,
 		keepForAWSMachineDeploymentCRsResource,
 	}
