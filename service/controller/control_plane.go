@@ -26,7 +26,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -410,20 +409,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
-	var cpVPCResource resource.Interface
-	{
-		c := cpvpc.Config{
-			Logger: config.Logger,
-
-			InstallationName: config.InstallationName,
-		}
-
-		cpVPCResource, err = cpvpc.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpVPCIDResource resource.Interface
 	{
 		c := tccpvpcid.Config{
@@ -450,7 +435,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
 		tccpSubnetsResource,
-		cpVPCResource,
 		regionResource,
 
 		// All these resources implement certain business logic and operate based on

@@ -31,7 +31,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
@@ -551,20 +550,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
-	var cpVPCResource resource.Interface
-	{
-		c := cpvpc.Config{
-			Logger: config.Logger,
-
-			InstallationName: config.InstallationName,
-		}
-
-		cpVPCResource, err = cpvpc.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpVPCIDResource resource.Interface
 	{
 		c := tccpvpcid.Config{
@@ -598,7 +583,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		encryptionSearcherResource,
 		regionResource,
 		cpRouteTablesResource,
-		cpVPCResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
