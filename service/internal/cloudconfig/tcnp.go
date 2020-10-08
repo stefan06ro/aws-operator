@@ -130,6 +130,9 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		})
 
 		err := g.Wait()
+
+		fmt.Printf("%v", err)
+
 		if certs.IsTimeout(err) {
 			return nil, microerror.Maskf(timeoutError, "waited too long for certificates")
 		} else if randomkeys.IsTimeout(err) {

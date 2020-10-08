@@ -237,6 +237,9 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		})
 
 		err := g.Wait()
+
+		fmt.Printf("%v", err)
+
 		if certs.IsTimeout(err) {
 			return "", microerror.Maskf(timeoutError, "waited too long for certificates")
 		} else if randomkeys.IsTimeout(err) {
