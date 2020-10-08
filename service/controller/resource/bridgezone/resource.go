@@ -207,7 +207,9 @@ func (r *Resource) Name() string {
 //     }
 //
 func (r *Resource) findHostedZoneID(ctx context.Context, client *route53.Route53, name string) (string, error) {
-	fmt.Printf("Looking for hosted zone %s\n", name)
+	if !strings.HasSuffix(name, ".") {
+		name = fmt.Sprintf("%s.", name)
+	}
 
 	in := &route53.ListHostedZonesByNameInput{
 		DNSName: aws.String(name),
@@ -218,10 +220,8 @@ func (r *Resource) findHostedZoneID(ctx context.Context, client *route53.Route53
 		return "", microerror.Mask(err)
 	}
 
-	fmt.Printf("Hosted Zones: %v\n", out)
-
 	for _, hostedZone := range out.HostedZones {
-		if *hostedZone.Name == name {
+		if *hostedZone.Name == name && !*hostedZone.Config.PrivateZone {
 			return *hostedZone.Id, nil
 		}
 	}
