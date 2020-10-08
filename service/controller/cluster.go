@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
@@ -36,7 +35,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cphostedzone"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
@@ -643,21 +641,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var cpRouteTablesResource resource.Interface
-	{
-		c := cproutetables.Config{
-			Logger:       config.Logger,
-			Installation: config.InstallationName,
-
-			Names: strings.Split(config.RouteTables, ","),
-		}
-
-		cpRouteTablesResource, err = cproutetables.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var secretFinalizerResource resource.Interface
 	{
 		c := secretfinalizer.Config{
@@ -739,7 +722,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		accountIDResource,
 		natGatewayAddressesResource,
 		cpHostedZoneResource,
-		cpRouteTablesResource,
 		tccpVPCIDResource,
 		tccpOutputsResource,
 		tccpSubnetsResource,

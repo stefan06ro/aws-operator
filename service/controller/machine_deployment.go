@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
@@ -30,7 +29,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
@@ -347,21 +345,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
-	var cpRouteTablesResource resource.Interface
-	{
-		c := cproutetables.Config{
-			Logger:       config.Logger,
-			Installation: config.InstallationName,
-
-			Names: strings.Split(config.RouteTables, ","),
-		}
-
-		cpRouteTablesResource, err = cproutetables.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
@@ -583,7 +566,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		accountIDResource,
 		encryptionSearcherResource,
 		regionResource,
-		cpRouteTablesResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
