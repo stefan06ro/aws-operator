@@ -6,6 +6,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"

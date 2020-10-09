@@ -29,6 +29,21 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's tccp stack")
+	i := &cloudformation.DescribeStacksInput{
+		StackName: aws.String(key.StackNameTCCP(&cr)),
+	}
+
+	o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
+	if IsNotExists(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's tccp stack")
+		return nil
+	}
+	if *o.Stacks[0].StackStatus != cloudformation.StackStatusCreateComplete {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for tccp stack to complete creation")
+		return nil
+	}
+
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane finalizer cloud formation stack")
 
