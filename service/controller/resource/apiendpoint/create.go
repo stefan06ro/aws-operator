@@ -60,6 +60,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		cluster.Status.APIEndpoints = append(cluster.Status.APIEndpoints, apiEndpoint)
 	}
 
+	fmt.Printf("vol-debug | cluster status: %v\n", cluster.Status)
+
 	{
 		err = r.ctrlClient.Status().Update(ctx, &cluster)
 		if err != nil {
