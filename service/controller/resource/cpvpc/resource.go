@@ -102,7 +102,16 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding vpc info for %#q", installationName))
 
-		i := &ec2.DescribeVpcsInput{
+		i := &ec2.DescribeVpcsInput{}
+
+		o, err := client.DescribeVpcs(i)
+		if err != nil {
+			return "", "", microerror.Mask(err)
+		}
+
+		fmt.Printf("vpc: %v\n", o.Vpcs)
+
+		i = &ec2.DescribeVpcsInput{
 			Filters: []*ec2.Filter{
 				{
 					Name: aws.String(fmt.Sprintf("tag:%s", key.TagName)),
@@ -119,10 +128,11 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 			},
 		}
 
-		o, err := client.DescribeVpcs(i)
+		o, err = client.DescribeVpcs(i)
 		if err != nil {
 			return "", "", microerror.Mask(err)
 		}
+
 		if len(o.Vpcs) != 1 {
 			return "", "", microerror.Maskf(executionFailedError, "expected one vpc, got %d", len(o.Vpcs))
 		}
